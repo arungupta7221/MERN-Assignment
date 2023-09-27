@@ -54,7 +54,7 @@ app.put('/api/dishes/:id', async (req, res) => {
   const { price } = req.body
 
   try {
-    await Data.updateOne({ id }, { price })
+    await Dish.updateOne({ id }, { price })
     res.json({ message: 'Price updated successfully' })
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' })
