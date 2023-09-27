@@ -11,6 +11,7 @@ const DishList = () => {
     axios.get('/api/dishes').then((response) => {
       setData(response.data)
       setOriginalData(response.data)
+      console.log('Received data:', response.data)
     })
   }, [])
 
@@ -59,7 +60,7 @@ const DishList = () => {
   return (
     <div>
       <h1>Dish List</h1>
-      <DishTable data={data} updatePrice={updatePrice} />
+      {data.length > 0 && <DishTable data={data} updatePrice={updatePrice} />}
       <button onClick={handleSave}>Save</button>
       <button onClick={handleResetAll}>Reset</button>
     </div>
