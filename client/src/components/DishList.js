@@ -1,20 +1,14 @@
-// src/components/DishList.js
 import React, { useEffect, useState } from 'react'
-import axios from 'axios'
+import axios from './axios'
 import DishTable from './DishTable'
 
 const DishList = () => {
   const [data, setData] = useState([])
   const [originalData, setOriginalData] = useState([])
 
-  // Set the base URL for Axios
-  const axiosInstance = axios.create({
-    baseURL: 'http://localhost:5000', // Update this URL to match your backend's address
-  })
-
   useEffect(() => {
     // Fetch data from your API and store it in both data and originalData
-    axiosInstance.get('/api/dishes').then((response) => {
+    axios.get('/api/dishes').then((response) => {
       setData(response.data)
       setOriginalData(response.data)
     })
@@ -22,32 +16,44 @@ const DishList = () => {
 
   const updatePrice = (id, newPrice) => {
     // Update the price in the data state
-    const updatedData = data.map((dish) =>
+    const updatedData = data?.map((dish) =>
       dish.id === id ? { ...dish, price: parseFloat(newPrice) } : dish,
     )
     setData(updatedData)
 
-    // Send the updated price to the server
-    axiosInstance.put(`/api/dishes/${id}`, { price: parseFloat(newPrice) }).then((response) => {
-      console.log('Price updated successfully', response.data)
-    })
+    // No need to send the updated price to the server immediately
   }
 
   const handleSave = () => {
     // Send the updated data to the server for saving
-    axiosInstance.post('/api/save-dishes', data).then((response) => {
+    axios.post('/api/save-dishes', data).then((response) => {
       console.log('Data saved successfully', response.data)
     })
   }
 
-  const handleReset = (id) => {
-    // Reset the data to the originalData
-    setData(originalData)
-
-    // Send a request to reset the price on the server
-    axiosInstance.put(`/api/dishes/reset/${id}`).then((response) => {
-      console.log('Price reset successfully', response.data)
+  const handleResetAll = () => {
+    // Send a PATCH request to reset all prices on the server
+    fetch('/api/dishes/resetAll', {
+      method: 'PATCH',
+      credentials: 'include', // Include credentials to handle cookies (if needed)
     })
+      .then((response) => {
+        if (response.ok) {
+          return response.json() // Assuming the response contains JSON data
+        } else {
+          throw new Error('Network response was not ok')
+        }
+      })
+      .then((data) => {
+        console.log('All prices reset successfully', data)
+        // Reset the state to its original data (originalData)
+        setOriginalData(data)
+        // You can also update the current data state if needed
+        setData(data)
+      })
+      .catch((error) => {
+        console.error('An error occurred:', error)
+      })
   }
 
   return (
@@ -55,7 +61,7 @@ const DishList = () => {
       <h1>Dish List</h1>
       <DishTable data={data} updatePrice={updatePrice} />
       <button onClick={handleSave}>Save</button>
-      <button onClick={handleReset}>Reset</button>
+      <button onClick={handleResetAll}>Reset</button>
     </div>
   )
 }

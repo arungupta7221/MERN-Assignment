@@ -1,10 +1,13 @@
-// src/components/DishTable.js
 import React from 'react'
 import { useTable, useSortBy, useExpanded } from 'react-table'
 
 const DishTable = ({ data, updatePrice }) => {
   const columns = React.useMemo(
     () => [
+      {
+        Header: 'ID',
+        accessor: 'id',
+      },
       {
         Header: 'Category',
         accessor: 'category',
@@ -23,8 +26,11 @@ const DishTable = ({ data, updatePrice }) => {
         Cell: ({ cell }) => (
           <input
             type="number"
-            value={cell.value}
-            onChange={(e) => updatePrice(cell.row.original.id, e.target.value)}
+            value={cell.row.original.price}
+            onChange={(e) => {
+              const newValue = parseFloat(e.target.value)
+              updatePrice(cell.row.original.id, newValue)
+            }}
           />
         ),
       },
@@ -49,9 +55,9 @@ const DishTable = ({ data, updatePrice }) => {
     <div>
       <table {...getTableProps()} className="table">
         <thead>
-          {headerGroups.map((headerGroup) => (
+          {headerGroups?.map((headerGroup) => (
             <tr {...headerGroup.getHeaderGroupProps()}>
-              {headerGroup.headers.map((column) => (
+              {headerGroup?.headers?.map((column) => (
                 <th {...column.getHeaderProps(column.getSortByToggleProps())}>
                   {column.render('Header')}
                   <span>{column.isSorted ? (column.isSortedDesc ? ' 🔽' : ' 🔼') : ''}</span>
@@ -61,19 +67,19 @@ const DishTable = ({ data, updatePrice }) => {
           ))}
         </thead>
         <tbody {...getTableBodyProps()}>
-          {rows.map((row) => {
+          {rows?.map((row) => {
             prepareRow(row)
             return (
               <React.Fragment key={row.id}>
                 <tr {...row.getRowProps()}>
-                  {row.cells.map((cell) => {
+                  {row?.cells?.map((cell) => {
                     return <td {...cell.getCellProps()}>{cell.render('Cell')}</td>
                   })}
                 </tr>
-                {row.isExpanded && row.subRows ? ( // Check if row is expanded and has subRows
+                {row.isExpanded && row.subRows ? (
                   <tr>
                     <td colSpan={columns.length}>
-                      {row.subRows.map((subRow) => (
+                      {row?.subRows?.map((subRow) => (
                         <div key={subRow.id}>{subRow.original.name}</div>
                       ))}
                     </td>
